@@ -1,0 +1,124 @@
+package com.lingdong.android.ldlicense.util
+
+import android.Manifest
+import android.app.Activity
+import android.content.Context
+import android.content.pm.PackageManager
+import android.net.wifi.ScanResult
+import android.net.wifi.WifiManager
+import android.os.Build
+import android.util.Log
+import android.widget.Toast
+import es.dmoral.toasty.Toasty
+
+class `WifiScanner.back` {
+
+    companion object {
+
+        private const val REQ_WIFI_PERMISSION = 2001
+        private var pendingCallback: ((List<ScanResult>) -> Unit)? = null
+
+        /**
+         * 外部调用入口
+         */
+        fun scan(activity: Activity, callback: (List<ScanResult>) -> Unit) {
+            pendingCallback = callback
+
+            // 先检查权限
+            if (!checkPermission(activity)) {
+                requestPermission(activity)
+                return
+            }
+
+            // 有权限则直接扫描
+            startScan(activity)
+        }
+
+        /**
+         * 检查 WiFi 权限
+         */
+        private fun checkPermission(context: Context): Boolean {
+            return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                context.checkSelfPermission(Manifest.permission.NEARBY_WIFI_DEVICES) ==
+                        PackageManager.PERMISSION_GRANTED
+            } else {
+                context.checkSelfPermission(Manifest.permission.ACCESS_FINE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED
+            }
+        }
+
+        /**
+         * 请求 WiFi 扫描权限
+         */
+        private fun requestPermission(activity: Activity) {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                activity.requestPermissions(
+                    arrayOf(Manifest.permission.NEARBY_WIFI_DEVICES),
+                    REQ_WIFI_PERMISSION
+                )
+            } else {
+                activity.requestPermissions(
+                    arrayOf(Manifest.permission.ACCESS_FINE_LOCATION),
+                    REQ_WIFI_PERMISSION
+                )
+            }
+        }
+
+        private fun dedUpBySSID(results: List<ScanResult>): List<ScanResult> {
+            return results
+                .filter { it.SSID.isNotEmpty() }             // 去掉隐藏 SSID
+                .groupBy { it.SSID }                         // 按 SSID 分组
+                .map { (_, list) ->
+                    list.maxBy { it.level }                 // 每组取信号最强的一条 (level 越大越强)
+                }
+        }
+
+        /**
+         * 真正执行 WiFi 扫描
+         */
+        private fun startScan(context: Context) {
+            Log.d("WifiScanner", "startScan: ")
+            val wifiManager =
+                context.applicationContext.getSystemService(Context.WIFI_SERVICE) as WifiManager
+
+            try {
+                val success = wifiManager.startScan()
+
+                if (!success) {
+                    Toasty.warning(
+                        context,
+                        "扫描WiFi失败，使用上一次结果，有需要请重新扫描。",
+                        Toast.LENGTH_SHORT
+                    ).show()
+                }
+                val results = wifiManager.scanResults
+                wifiManager
+                pendingCallback?.invoke(dedUpBySSID(results))
+
+            } catch (e: SecurityException) {
+                e.printStackTrace()
+                Toasty.error(context, "缺少权限，无法扫描 WiFi。", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+        /**
+         * Activity 的 onRequestPermissionsResult 需要转发到这里
+         */
+        fun onRequestPermissionsResult(
+            context: Context,
+            activity: Activity,
+            requestCode: Int,
+            grantResults: IntArray
+        ) {
+            if (requestCode == REQ_WIFI_PERMISSION) {
+                if (grantResults.isNotEmpty() &&
+                    grantResults[0] == PackageManager.PERMISSION_GRANTED
+                ) {
+                    startScan(activity)
+                } else {
+                    Toasty.error(context, "需要权限才能扫描 WiFi", Toast.LENGTH_SHORT).show()
+                }
+            }
+        }
+    }
+}
