@@ -80,12 +80,10 @@ import com.lingdong.android.ldlicense.device.isSuccess
 import com.lingdong.android.ldlicense.network.ActRequest
 import com.lingdong.android.ldlicense.network.ActivationCode
 import com.lingdong.android.ldlicense.network.User
+import com.lingdong.android.ldlicense.scaffold.CommonScaffold
 import com.lingdong.android.ldlicense.util.WifiScanner
-import es.dmoral.toasty.BuildConfig
 import kotlinx.coroutines.job
-import kotlinx.coroutines.suspendCancellableCoroutine
 import java.util.concurrent.CancellationException
-import java.util.concurrent.atomic.AtomicBoolean
 
 
 class MainActivity : ComponentActivity() {
@@ -108,6 +106,13 @@ class MainActivity : ComponentActivity() {
             try {
                 user.value = withContext(Dispatchers.IO) {
                     NetworkClient.userinfo()
+                }
+                if (BuildConfig.FLAVOR == "noise") {
+                    val intent = Intent(this@MainActivity, NoiseActivity::class.java)
+                    intent.putExtra("EXTRA_USER", user.value)
+                    startActivity(intent)
+                    finish()
+                    return@launch
                 }
                 getCodeList(user.value?.customerId ?: 0)
                 setupUI()
@@ -170,33 +175,11 @@ class MainActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             LDlicenseTheme {
-                Scaffold(
-                    modifier = Modifier.fillMaxSize(), topBar = {
-                        // 将工具栏移到Scaffold的topBar中
-                        TopAppBar(title = { Text("LD License") }, actions = {
-                            var menuExpanded by remember { mutableStateOf(false) }
-                            IconButton(onClick = { menuExpanded = true }) {
-                                Icon(Icons.Default.MoreVert, contentDescription = "更多选项")
-                            }
-
-                            DropdownMenu(
-                                expanded = menuExpanded,
-                                onDismissRequest = { menuExpanded = false }) {
-                                DropdownMenuItem(text = { Text("退出登录") }, onClick = {
-                                    // 清除token
-                                    Util.setToken(this@MainActivity, "")
-                                    // 跳转到登录页面
-                                    menuExpanded = false
-                                    val intent =
-                                        Intent(this@MainActivity, LoginActivity::class.java)
-                                    intent.flags =
-                                        Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                                    startActivity(intent)
-                                    finish()
-                                })
-                            }
-                        })
-                    }) { innerPadding ->
+                CommonScaffold(
+                    onLogout = {
+                        finish()
+                    }
+                )  { innerPadding ->
                     Greeting(
                         logContent = logContent,
                         modifier = Modifier.padding(innerPadding),
@@ -590,6 +573,7 @@ fun Greeting(
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
+            Log.d("Greeting", "Permission denied1.")
             onScanWifi()
         } else {
             Log.d("Greeting", "Permission denied.")

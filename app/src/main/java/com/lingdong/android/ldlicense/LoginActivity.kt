@@ -78,13 +78,7 @@ class LoginActivity : ComponentActivity() {
                                 ).show()
                             }*/
                             if (e is ApiException) {
-                                withContext(Dispatchers.Main) {
-                                    Toasty.error(
-                                        this@LoginActivity,
-                                        "登录失败：${e.message}",
-                                        Toast.LENGTH_SHORT
-                                    ).show()
-                                }
+
                             }
                         }
                     }

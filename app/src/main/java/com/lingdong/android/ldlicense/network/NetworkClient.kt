@@ -19,7 +19,7 @@ import java.util.concurrent.TimeUnit
 object NetworkClient {
     // IMPORTANT: Replace with your actual API base URL.
     // 10.0.2.2 is the standard address for the host machine's localhost from the Android emulator.
-    private const val BASE_URL = "https://api-sr.wearke.com"
+    private const val BASE_URL = "https://api-sr-direct.wearke.com"
 
 
     // 添加响应拦截器
@@ -148,6 +148,20 @@ object NetworkClient {
             return User(userObj.get("uid").asInt, userObj.get("nickname").asString,
                 customerObj.get("id").asInt,
                 customerObj.get("name").asString)
+        }
+    }
+
+    suspend fun getDeviceByQrcode(qrcode: String): DeviceResponse {
+        val request = Request.Builder()
+            .url("$BASE_URL/v1/admin/device/qrcode/$qrcode")
+            .build()
+
+        client.newCall(request).execute().use { response ->
+            val base = gson.fromJson(response.body?.string(), BaseResponse::class.java)
+            val res =  gson.fromJson(base.data, DeviceResponse::class.java)
+            Log.d("NetworkClient", "getDeviceByQrcode: $res")
+            res.codeType = CodeType.fromValue(base.data.asJsonObject.get("code_type").asInt) ?: CodeType.TYPE_NONE
+            return res
         }
     }
 

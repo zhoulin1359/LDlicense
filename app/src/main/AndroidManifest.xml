@@ -2,6 +2,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-feature
+        android:name="android.hardware.camera"
+        android:required="true" />
+
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.CHANGE_WIFI_STATE" />
@@ -10,6 +14,8 @@
     <uses-permission android:name="android.permission.NEARBY_WIFI_DEVICES" />
    <!-- // 连接WiFi需要的权限-->
     <uses-permission android:name="android.permission.CHANGE_NETWORK_STATE" />
+    <!-- // 相机权限-->
+    <uses-permission android:name="android.permission.CAMERA" />
     <application
         android:name=".MyApplication"
         android:allowBackup="true"
@@ -27,6 +33,16 @@
             android:exported="false"
             android:label="@string/app_name"
             android:theme="@style/Theme.LDlicense" />
+        <activity
+            android:name=".NoiseActivity"
+            android:exported="false"
+            android:label="@string/app_name"
+            android:theme="@style/Theme.LDlicense" />
+        <activity
+            android:name=".QrScanActivity"
+            android:theme="@style/Theme.QrScan"
+            android:screenOrientation="portrait"
+            android:exported="false" />
         <activity
             android:name=".MainActivity"
             android:exported="true"
