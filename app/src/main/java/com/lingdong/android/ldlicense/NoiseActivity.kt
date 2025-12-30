@@ -68,13 +68,13 @@ class NoiseActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        var user = User(0, "", 0, "")
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.TIRAMISU) {
-            // 只有在 Android 13 (API 33) 及以上系统才会执行这里的代码
-            println("当前系统版本低于 Android 13")
-            finish()
-            return
+            user = intent.getParcelableExtra<User>("EXTRA_DEVICE") ?: User(0, "", 0, "")
+        } else {
+            user = intent.getParcelableExtra("EXTRA_USER", User::class.java) ?: User(0, "", 0, "")
         }
-        val user = intent.getParcelableExtra("EXTRA_USER", User::class.java) ?: User(0, "", 0, "")
+
         getCodeList(user.customerId)
         setContent {
             LDlicenseTheme {
