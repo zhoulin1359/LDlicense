@@ -11,10 +11,10 @@ android {
 
     defaultConfig {
         applicationId = "com.lingdong.android.ldlicense"
-        minSdk = 29
+        minSdk = 27 // 最低支持 Android 7.0 (API 级别 27)
         targetSdk = 36
         versionCode = 1
-        versionName = "1.0.3"
+        versionName = "1.0.4"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -39,6 +39,22 @@ android {
         compose = true
         buildConfig = true
     }
+
+    signingConfigs {
+        getByName("debug")  {
+            storeFile = file("./key.jks")
+            keyAlias = "android"
+            keyPassword = "123456"
+            storePassword = "123456"
+        }
+        create("release")  {
+            storeFile = file("./key.jks")
+            keyAlias = "android"
+            keyPassword = "123456"
+            storePassword = "123456"
+        }
+    }
+
     flavorDimensions("app")
     productFlavors {
         create("recorder") {

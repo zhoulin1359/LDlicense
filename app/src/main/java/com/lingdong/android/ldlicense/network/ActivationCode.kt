@@ -16,6 +16,7 @@ data class ActRequest(
     @SerializedName("code") val code: String,
     @SerializedName("appid") val appId: String,
     @SerializedName("ext") val ext: String,
+    @SerializedName("act_type") val actType: Int,
 )
 
 data class ActResponse(

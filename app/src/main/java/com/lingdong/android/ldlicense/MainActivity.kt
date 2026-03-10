@@ -275,7 +275,8 @@ class MainActivity : ComponentActivity() {
                 uuid = deviceResponse.stringValue,
                 code = code.code,
                 appId = code.appId,
-                ext = extJson
+                ext = extJson,
+                actType = 8, // Dspotter
             )
             val (license, actSuccess) = activate(actRequest)
             if (!actSuccess) {
@@ -365,7 +366,8 @@ class MainActivity : ComponentActivity() {
                                 Util.getAppName(
                                     AppContextProvider.context
                                 )
-                            }/${Util.getAppVersionName(AppContextProvider.context)}\"}"// 扩展字段,记录激活人员、设备，json字符串
+                            }/${Util.getAppVersionName(AppContextProvider.context)}\"}",// 扩展字段,记录激活人员、设备，json字符串
+                            actType = 8, // Dspotter
                         )
                         // val actResponse = activate(actRequest)
                         lifecycleScope.launch {
@@ -468,7 +470,8 @@ class MainActivity : ComponentActivity() {
                             Util.getAppName(
                                 AppContextProvider.context
                             )
-                        }/${Util.getAppVersionName(AppContextProvider.context)}\"}"// 扩展字段,记录激活人员、设备，json字符串
+                        }/${Util.getAppVersionName(AppContextProvider.context)}\"}",// 扩展字段,记录激活人员、设备，json字符串
+                        actType = 8, // Dspotter
                     )
 
                     lifecycleScope.launch {

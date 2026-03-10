@@ -104,7 +104,8 @@ class NoiseActivity : ComponentActivity() {
                                         Util.getAppName(
                                             AppContextProvider.context
                                         )
-                                    }/${Util.getAppVersionName(AppContextProvider.context)}\"}"
+                                    }/${Util.getAppVersionName(AppContextProvider.context)}\"}",
+                                    2 // 降噪
                                 ), setIsActivating
                             )
                         })
